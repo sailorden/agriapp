@@ -52,7 +52,7 @@ angular.module('starter.controllers', [])
   }
   function takePicture(index){
     var options = {
-      quality: 50,
+      quality: 100,
       saveToPhotoAlbum: true,
       correctOrientation:true,
       destinationType: Camera.DestinationType.DATA_URL,
