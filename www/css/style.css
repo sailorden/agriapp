@@ -1,0 +1,16 @@
+/* Empty. Add your own CSS if you like */
+#map {
+    height: 100%;
+    width: 100%;
+}
+.scroll {
+    height: 100%;
+}
+#content{
+  bakground-color: #FF00FF;
+}
+#content img{
+  width: 100px;
+  height: 100px;
+  display: block;
+}
