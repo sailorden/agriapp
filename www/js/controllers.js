@@ -4,11 +4,12 @@ angular.module('starter.controllers', [])
 })
 .controller('MapCtrl', function($scope, $ionicActionSheet, $timeout, $cordovaCamera, $ionicPlatform, $ionicLoading, $compile, $ionicModal) {
   $scope.markers = JSON.parse(localStorage.getItem('savedMarkers')) || [];
-  $scope.pictureModal = function(){
+  $scope.pictureModal = function(id){
     $ionicModal.fromTemplateUrl('templates/modal.html', {
       scope: $scope,
       animation: 'slide-in-up'
     }).then(function(modal) {
+      $scope.src = "data:image/jpeg;base64,"+$scope.markers[id].imageURI;
       $scope.modal = modal;
       $scope.modal.show();
     });
@@ -30,14 +31,14 @@ angular.module('starter.controllers', [])
       }
     });
   };
-  function addMarkerOnPosition(item){
+  function addMarkerOnPosition(item, id){
     var position = item.position;
     var imageURI = item.imageURI;
     var lat  = position.coords.latitude;
     var long = position.coords.longitude;
     var myLatlng = new google.maps.LatLng(lat, long);
     $scope.src = "data:image/jpeg;base64,"+imageURI;
-    var contentString = '<div id="content" ng-click="pictureModal()"><img src="data:image/jpeg;base64,'+imageURI+'"></div>'
+    var contentString = '<div id="content" ng-click="pictureModal('+id+')"><img src="data:image/jpeg;base64,'+imageURI+'"></div>'
     var compiled = $compile(contentString)($scope);
     var infowindow = new google.maps.InfoWindow({
       content: compiled[0]
@@ -67,7 +68,7 @@ angular.module('starter.controllers', [])
         };
         $scope.markers.push(item);
         localStorage.setItem('savedMarkers', JSON.stringify($scope.markers));
-        addMarkerOnPosition(item);
+        addMarkerOnPosition(item, $scope.markers.length-1);
 
       }, function(err) {
         console.log(JSON.stringify(err));
@@ -83,33 +84,36 @@ angular.module('starter.controllers', [])
 
     var posOptions = {
       enableHighAccuracy: true,
-      timeout: 20000,
+      timeout: 8000,
       maximumAge: 0
     };
+    function init(){
+      navigator.geolocation.getCurrentPosition(function (position) {
+        var lat  = position.coords.latitude;
+        var long = position.coords.longitude;
 
-    navigator.geolocation.getCurrentPosition(function (position) {
-      var lat  = position.coords.latitude;
-      var long = position.coords.longitude;
+        var myLatlng = new google.maps.LatLng(lat, long);
 
-      var myLatlng = new google.maps.LatLng(lat, long);
+        var mapOptions = {
+          center: myLatlng,
+          zoom: 16,
+          mapTypeControl: false,
+          mapTypeId: google.maps.MapTypeId.SATELLITE
+        };
 
-      var mapOptions = {
-        center: myLatlng,
-        zoom: 16,
-        mapTypeControl: false,
-        mapTypeId: google.maps.MapTypeId.SATELLITE
-      };
+        var map = new google.maps.Map(document.getElementById("map"), mapOptions);
 
-      var map = new google.maps.Map(document.getElementById("map"), mapOptions);
-
-      $scope.map = map;
-      $ionicLoading.hide();
-      for(var i = 0; i<$scope.markers.length; i++){
-        addMarkerOnPosition($scope.markers[i]);
-      }
-    }, function(err) {
-      $ionicLoading.hide();
-      console.log(err);
-    }, posOptions);
+        $scope.map = map;
+        $ionicLoading.hide();
+        for(var i = 0; i<$scope.markers.length; i++){
+          addMarkerOnPosition($scope.markers[i], i);
+        }
+      }, function(err) {
+        $ionicLoading.hide();
+        console.log(JSON.stringify(err));
+      }, posOptions);
+    }
+    init();
   });
+
 });
