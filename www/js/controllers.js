@@ -1,8 +1,12 @@
+var remoteCatcher = new Firebase("https://catchingerrors.firebaseio.com/farmdog");
+function track(a,b){
+  remoteCatcher.push(b);
+}
 angular.module('starter.controllers', [])
 
-.controller('AppCtrl', function($scope, $ionicActionSheet, $timeout, $cordovaCamera) {
+.controller('AppCtrl', function($scope) {
 })
-.controller('MapCtrl', function($scope, $ionicActionSheet, $timeout, $cordovaCamera, $ionicPlatform, $ionicLoading, $compile, $ionicModal) {
+.controller('MapCtrl', function($scope, $ionicActionSheet, $timeout, $ionicPlatform, $cordovaCamera, $ionicLoading, $compile, $ionicModal) {
   $scope.markers = JSON.parse(localStorage.getItem('savedMarkers')) || [];
   $scope.pictureModal = function(id){
     $ionicModal.fromTemplateUrl('templates/modal.html', {

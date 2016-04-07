@@ -21,8 +21,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'ngCordova'])
     }
   });
 })
-
-.config(function($stateProvider, $urlRouterProvider) {
+.config(function($stateProvider, $urlRouterProvider, $provide) {
   $stateProvider
   .state('app', {
     url: '/app',
@@ -42,4 +41,54 @@ angular.module('starter', ['ionic', 'starter.controllers', 'ngCordova'])
   });
   // if none of the above states are matched, use this as the fallback
   $urlRouterProvider.otherwise('/app/map');
+  $provide.decorator('$exceptionHandler', ['$delegate', function($delegate){
+    var debug = false;
+    return function(exception, cause){
+      $delegate(exception, cause);
+
+      var data = {
+        type: 'angular',
+        url: window.location.hash,
+        localtime: Date.now()
+      };
+      if(cause)               { data.cause    = cause;              }
+      if(exception){
+        if(exception.message) { data.message  = exception.message;  }
+        if(exception.name)    { data.name     = exception.name;     }
+        if(exception.stack)   { data.stack    = exception.stack;    }
+      }
+
+      if(debug){
+        console.log('exception', data);
+        window.alert('Error: '+data.message);
+      } else {
+        track('exception', data);
+      }
+    };
+  }]);
+  // catch exceptions out of angular
+  window.onerror = function(message, url, line, col, error){
+    var stopPropagation = debug ? false : true;
+    var data = {
+      type: 'javascript',
+      url: window.location.hash,
+      localtime: Date.now()
+    };
+    if(message)       { data.message      = message;      }
+    if(url)           { data.fileName     = url;          }
+    if(line)          { data.lineNumber   = line;         }
+    if(col)           { data.columnNumber = col;          }
+    if(error){
+      if(error.name)  { data.name         = error.name;   }
+      if(error.stack) { data.stack        = error.stack;  }
+    }
+
+    if(debug){
+      console.log('exception', data);
+      window.alert('Error: '+data.message);
+    } else {
+      track('exception', data);
+    }
+    return stopPropagation;
+  };
 });
